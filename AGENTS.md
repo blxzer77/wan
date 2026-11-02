@@ -2,6 +2,10 @@
 
 wan is an Apache-2.0, self-hosted personal agent that recreates Grok Bot for one person.
 
+- **Plan:** start at [docs/dev/workflow.md](docs/dev/workflow.md); it tells you which task to pick and how to ship it.
+- **One task per PR:** take the first `todo` task in [docs/dev/tasks/](docs/dev/tasks/) whose deps are `done`; never start `blocked` tasks; never self-merge.
+- **Design is fixed:** [docs/dev/design/architecture.md](docs/dev/design/architecture.md) is the single design authority; ask Yuki instead of inventing, and change it only via an approved ADR.
+
 ## Repository layout
 
 - `crates/` — Rust crates.

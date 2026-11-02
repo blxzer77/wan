@@ -1,0 +1,12 @@
+---
+source: crates/wan-types/src/error.rs
+expression: ERROR_REGISTRY
+---
+[
+    ErrorDefinition {
+        kind: RoutineRateLimited,
+        name: "routine_rate_limited",
+        domain: Routine,
+        code: -32020,
+    },
+]

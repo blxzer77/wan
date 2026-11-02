@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
 pub const JSON_RPC_PARSE_ERROR: i32 = -32700;
 pub const JSON_RPC_INVALID_REQUEST: i32 = -32600;
@@ -19,7 +20,9 @@ pub enum ErrorDomain {
     Routine,
 }
 
-#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq, Serialize, Deserialize)]
+/// Error kinds currently defined by the design. The design mentions about 36 kinds,
+/// but only `routine_rate_limited` has a defined contract so far.
+#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "snake_case")]
 pub enum ErrorKind {
     RoutineRateLimited,
@@ -40,18 +43,19 @@ pub const ERROR_REGISTRY: &[ErrorDefinition] = &[ErrorDefinition::new(
     -32_020,
 )];
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Type)]
 pub struct ApiError {
     pub code: i32,
     pub data: ApiErrorData,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct ApiErrorData {
     pub kind: ErrorKind,
     pub retryable: bool,
-    pub retry_after_ms: Option<u64>,
+    /// Milliseconds use u32 because the JSON wire value is a JavaScript-safe number.
+    pub retry_after_ms: Option<u32>,
     pub params: BTreeMap<String, String>,
     pub request_id: Option<String>,
 }
@@ -141,7 +145,7 @@ impl ErrorDomain {
 impl ApiError {
     pub fn new(
         kind: ErrorKind,
-        retry_after_ms: Option<u64>,
+        retry_after_ms: Option<u32>,
         params: BTreeMap<String, String>,
         request_id: Option<String>,
     ) -> Result<Self, ApiErrorBuildError> {
@@ -220,6 +224,20 @@ mod tests {
         assert_eq!(error.code, -32_020);
         assert_eq!(error.data.kind.as_str(), "routine_rate_limited");
         assert!(!error.data.retryable);
+    }
+
+    #[test]
+    fn retry_after_ms_u32_boundary_round_trips() {
+        let error = ApiError::new(
+            ErrorKind::RoutineRateLimited,
+            Some(u32::MAX),
+            BTreeMap::new(),
+            None,
+        )
+        .expect("valid API error");
+        let json = serde_json::to_string(&error).expect("serializable API error");
+        let round_trip: ApiError = serde_json::from_str(&json).expect("deserializable API error");
+        assert_eq!(round_trip.data.retry_after_ms, Some(u32::MAX));
     }
 
     #[test]

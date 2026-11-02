@@ -3,6 +3,12 @@
 version = 4
 
 [[package]]
+name = "Inflector"
+version = "0.11.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fe438c63458706e03479442743baae6c88256498e6431708f6dfc520a26515d3"
+
+[[package]]
 name = "bitflags"
 version = "2.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -125,6 +131,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
 
 [[package]]
+name = "rustc_version"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cfcb3a22ef46e85b45de6ee7e79d063319ebb6594faafcf1c225ea92ab6e9b92"
+dependencies = [
+ "semver",
+]
+
+[[package]]
 name = "rustix"
 version = "1.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -136,6 +151,12 @@ dependencies = [
  "linux-raw-sys",
  "windows-sys",
 ]
+
+[[package]]
+name = "semver"
+version = "1.0.28"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8a7852d02fc848982e0c167ef163aaff9cd91dc640ba85e263cb1ce46fae51cd"
 
 [[package]]
 name = "serde"
@@ -164,7 +185,7 @@ checksum = "e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn",
+ "syn 3.0.9",
 ]
 
 [[package]]
@@ -185,6 +206,67 @@ name = "similar"
 version = "2.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbbb5d9659141646ae647b42fe094daf6c6192d1620870b449d9557f748b2daa"
+
+[[package]]
+name = "specta"
+version = "2.0.0-rc.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "81633014710ece1c7e8ac99e1bc9ad8d4339a2ccbae89ca2aa1095d4262c86b8"
+dependencies = [
+ "rustc_version",
+ "specta-macros",
+]
+
+[[package]]
+name = "specta-macros"
+version = "2.0.0-rc.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1fe882a75f48f76ac091ca2c5aaad7abd4dfdedf649c08e865bb0d62b5a2cb92"
+dependencies = [
+ "Inflector",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "specta-serde"
+version = "0.0.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a75ee5142f81ca1e0046b16c09d0f5a36c75884802da3f0281f78bfe221e559"
+dependencies = [
+ "specta",
+ "specta-macros",
+]
+
+[[package]]
+name = "specta-typescript"
+version = "0.0.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a113bb506b00463cfb54c5819e55ec081bc7d52ef463d7726181e9073cd473a"
+dependencies = [
+ "specta",
+]
+
+[[package]]
+name = "specta-util"
+version = "0.0.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6df073177e00bb59cf7e8147ac147c451f51a21a4858100d6d74baf0e6fe3bc2"
+dependencies = [
+ "specta",
+]
+
+[[package]]
+name = "syn"
+version = "2.0.119"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "872831b642d1a07999a962a351ed35b955ea2cfc8f3862091e2a240a84f17297"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "unicode-ident",
+]
 
 [[package]]
 name = "syn"
@@ -256,6 +338,10 @@ dependencies = [
  "insta",
  "serde",
  "serde_json",
+ "specta",
+ "specta-serde",
+ "specta-typescript",
+ "specta-util",
 ]
 
 [[package]]

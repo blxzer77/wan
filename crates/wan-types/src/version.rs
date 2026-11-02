@@ -1,6 +1,10 @@
 use core::fmt;
 
-#[derive(Debug, Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use specta::Type;
+
+#[derive(Debug, Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd, Type)]
+#[specta(type = String)]
 pub struct ProtocolVersion {
     year: u16,
     month: u8,
@@ -57,6 +61,25 @@ impl fmt::Display for ProtocolVersion {
             "{:04}-{:02}-{:02}",
             self.year, self.month, self.day
         )
+    }
+}
+
+impl Serialize for ProtocolVersion {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
+    }
+}
+
+impl<'de> Deserialize<'de> for ProtocolVersion {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let value = String::deserialize(deserializer)?;
+        Self::parse(&value).map_err(serde::de::Error::custom)
     }
 }
 
@@ -124,6 +147,17 @@ mod tests {
         assert_eq!(
             ProtocolVersion::parse("2026-02-30"),
             Err(ProtocolVersionError::InvalidDate)
+        );
+    }
+
+    #[test]
+    fn serializes_as_a_date_string() {
+        let version = ProtocolVersion::parse("2026-11-02").unwrap();
+        let json = serde_json::to_string(&version).unwrap();
+        assert_eq!(json, "\"2026-11-02\"");
+        assert_eq!(
+            serde_json::from_str::<ProtocolVersion>(&json).unwrap(),
+            version
         );
     }
 

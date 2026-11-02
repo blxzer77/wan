@@ -19,6 +19,8 @@ supply-chain:
     cargo deny check
     pnpm audit --registry=https://registry.npmjs.org/ --audit-level high
 
+# NOTICE is generated from release dependencies; dev-only test dependencies such as zmij remain in Cargo.lock but are omitted.
+# Normalize upstream license text so generated NOTICE passes the repository whitespace gate.
 licenses:
     tmp="$$(mktemp)" && trap 'rm -f "$$tmp"' EXIT && cargo about generate --workspace --frozen --fail --config about.toml --output-file NOTICE about.hbs && python3 -c 'from pathlib import Path; p = Path("NOTICE"); p.write_text("\n".join(line.rstrip() for line in p.read_text().splitlines()) + "\n")' && pnpm exec license-checker-rseidelsohn --failOn 'GPL;AGPL' --json --out "$$tmp" && python3 scripts/generate-third-party-licenses.py "$$tmp" manual.toml THIRD_PARTY_LICENSES.html
 

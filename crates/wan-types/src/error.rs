@@ -20,6 +20,8 @@ pub enum ErrorDomain {
     Routine,
 }
 
+/// Error kinds currently defined by the design. The design mentions about 36 kinds,
+/// but only `routine_rate_limited` has a defined contract so far.
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "snake_case")]
 pub enum ErrorKind {
@@ -52,6 +54,7 @@ pub struct ApiError {
 pub struct ApiErrorData {
     pub kind: ErrorKind,
     pub retryable: bool,
+    /// Milliseconds use u32 because the JSON wire value is a JavaScript-safe number.
     pub retry_after_ms: Option<u32>,
     pub params: BTreeMap<String, String>,
     pub request_id: Option<String>,
@@ -221,6 +224,20 @@ mod tests {
         assert_eq!(error.code, -32_020);
         assert_eq!(error.data.kind.as_str(), "routine_rate_limited");
         assert!(!error.data.retryable);
+    }
+
+    #[test]
+    fn retry_after_ms_u32_boundary_round_trips() {
+        let error = ApiError::new(
+            ErrorKind::RoutineRateLimited,
+            Some(u32::MAX),
+            BTreeMap::new(),
+            None,
+        )
+        .expect("valid API error");
+        let json = serde_json::to_string(&error).expect("serializable API error");
+        let round_trip: ApiError = serde_json::from_str(&json).expect("deserializable API error");
+        assert_eq!(round_trip.data.retry_after_ms, Some(u32::MAX));
     }
 
     #[test]

@@ -7,11 +7,16 @@ export type ApiError = {
 export type ApiErrorData = {
 	kind: ErrorKind,
 	retryable: boolean,
+	/**  Milliseconds use u32 because the JSON wire value is a JavaScript-safe number. */
 	retryAfterMs: number | null,
 	params: { [key in string]: string },
 	requestId: string | null,
 };
 
+/**
+ *  Error kinds currently defined by the design. The design mentions about 36 kinds,
+ *  but only `routine_rate_limited` has a defined contract so far.
+ */
 export type ErrorKind = "routine_rate_limited";
 
 export type ProtocolVersion = string;

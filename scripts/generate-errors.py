@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from error_registry import load_error_definitions
+from error_registry import load_error_definitions, load_protocol_constants
 
 
 OUTPUT = Path(__file__).parents[1] / "docs" / "errors.md"
@@ -13,6 +13,18 @@ OUTPUT = Path(__file__).parents[1] / "docs" / "errors.md"
 
 def main() -> int:
     definitions = load_error_definitions()
+    constants = load_protocol_constants()
+    json_rpc_codes = [
+        ("JSON_RPC_PARSE_ERROR", "Parse error"),
+        ("JSON_RPC_INVALID_REQUEST", "Invalid request"),
+        ("JSON_RPC_METHOD_NOT_FOUND", "Method not found"),
+        ("JSON_RPC_INVALID_PARAMS", "Invalid params"),
+        ("JSON_RPC_INTERNAL_ERROR", "Internal error"),
+        ("JSON_RPC_CANCELLED", "Cancelled"),
+    ]
+    json_rpc_rows = "\n".join(
+        f"| `{constants[name]}` | {meaning} |" for name, meaning in json_rpc_codes
+    )
     rows = "\n".join(
         f"| `{definition['name']}` | `{definition['domain']}` | `{definition['code']}` |"
         for definition in definitions
@@ -25,16 +37,11 @@ This file is generated from `crates/wan-types/src/error.rs`. Only error kinds wi
 
 | Code | Meaning |
 |---:|---|
-| `-32700` | Parse error |
-| `-32600` | Invalid request |
-| `-32601` | Method not found |
-| `-32602` | Invalid params |
-| `-32603` | Internal error |
-| `-32800` | Cancelled |
+{json_rpc_rows}
 
 ## wan error codes
 
-Wan error codes use `-32000..-32089`; `-32090..-32099` are reserved.
+Wan error codes use `{constants["WAN_ERROR_END"]}..{constants["WAN_ERROR_START"]}`; `{constants["WAN_RESERVED_ERROR_END"]}..{constants["WAN_RESERVED_ERROR_START"]}` are reserved.
 
 | Kind | Domain | Code |
 |---|---|---:|

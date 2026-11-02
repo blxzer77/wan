@@ -38,7 +38,7 @@ errors:
 errors-check:
     just errors
     python3 scripts/check-errors.py
-    git diff --exit-code -- docs/errors.md
+    git diff --exit-code HEAD -- docs/errors.md
 
 ci: fmt lint test deps-check debug-port-check supply-chain licenses-check sbom vendor-check errors-check
     pnpm exec tsc --noEmit

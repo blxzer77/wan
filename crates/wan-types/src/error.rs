@@ -1,5 +1,7 @@
 use std::collections::BTreeMap;
 
+use serde::{Deserialize, Serialize};
+
 pub const JSON_RPC_PARSE_ERROR: i32 = -32700;
 pub const JSON_RPC_INVALID_REQUEST: i32 = -32600;
 pub const JSON_RPC_METHOD_NOT_FOUND: i32 = -32601;
@@ -12,12 +14,13 @@ pub const WAN_ERROR_END: i32 = -32_000;
 pub const WAN_RESERVED_ERROR_START: i32 = -32_099;
 pub const WAN_RESERVED_ERROR_END: i32 = -32_090;
 
-#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub enum ErrorDomain {
     Routine,
 }
 
-#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum ErrorKind {
     RoutineRateLimited,
 }
@@ -37,13 +40,14 @@ pub const ERROR_REGISTRY: &[ErrorDefinition] = &[ErrorDefinition::new(
     -32_020,
 )];
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ApiError {
     pub code: i32,
     pub data: ApiErrorData,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ApiErrorData {
     pub kind: ErrorKind,
     pub retryable: bool,
@@ -51,6 +55,27 @@ pub struct ApiErrorData {
     pub params: BTreeMap<String, String>,
     pub request_id: Option<String>,
 }
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum ApiErrorBuildError {
+    UnknownParam { kind: ErrorKind, name: String },
+}
+
+impl std::fmt::Display for ApiErrorBuildError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::UnknownParam { kind, name } => {
+                write!(
+                    formatter,
+                    "parameter {name} is not allowed for {}",
+                    kind.as_str()
+                )
+            }
+        }
+    }
+}
+
+impl std::error::Error for ApiErrorBuildError {}
 
 impl ErrorDefinition {
     pub const fn new(kind: ErrorKind, name: &'static str, domain: ErrorDomain, code: i32) -> Self {
@@ -87,6 +112,12 @@ impl ErrorKind {
             Self::RoutineRateLimited => &[],
         }
     }
+
+    pub const fn retryable(self) -> bool {
+        match self {
+            Self::RoutineRateLimited => false,
+        }
+    }
 }
 
 impl ErrorDomain {
@@ -110,21 +141,28 @@ impl ErrorDomain {
 impl ApiError {
     pub fn new(
         kind: ErrorKind,
-        retryable: bool,
         retry_after_ms: Option<u64>,
         params: BTreeMap<String, String>,
         request_id: Option<String>,
-    ) -> Self {
-        Self {
+    ) -> Result<Self, ApiErrorBuildError> {
+        for name in params.keys() {
+            if !kind.allowed_params().contains(&name.as_str()) {
+                return Err(ApiErrorBuildError::UnknownParam {
+                    kind,
+                    name: name.clone(),
+                });
+            }
+        }
+        Ok(Self {
             code: kind.code(),
             data: ApiErrorData {
                 kind,
-                retryable,
+                retryable: kind.retryable(),
                 retry_after_ms,
                 params,
                 request_id,
             },
-        }
+        })
     }
 }
 
@@ -141,8 +179,8 @@ mod tests {
     use std::collections::BTreeMap;
 
     use super::{
-        ApiError, ERROR_REGISTRY, ErrorKind, JSON_RPC_CANCELLED, is_reserved_wan_error_code,
-        is_wan_error_code,
+        ApiError, ApiErrorBuildError, ERROR_REGISTRY, ErrorKind, JSON_RPC_CANCELLED,
+        is_reserved_wan_error_code, is_wan_error_code,
     };
 
     #[test]
@@ -174,14 +212,40 @@ mod tests {
     fn builds_api_error_with_protocol_fields() {
         let error = ApiError::new(
             ErrorKind::RoutineRateLimited,
-            true,
             Some(1_000),
             BTreeMap::new(),
             Some("req-1".to_owned()),
-        );
+        )
+        .expect("valid API error");
         assert_eq!(error.code, -32_020);
         assert_eq!(error.data.kind.as_str(), "routine_rate_limited");
-        assert!(error.data.retryable);
+        assert!(!error.data.retryable);
+    }
+
+    #[test]
+    fn rejects_unknown_error_params() {
+        let mut params = BTreeMap::new();
+        params.insert("unknown".to_owned(), "value".to_owned());
+        assert_eq!(
+            ApiError::new(ErrorKind::RoutineRateLimited, None, params, None),
+            Err(ApiErrorBuildError::UnknownParam {
+                kind: ErrorKind::RoutineRateLimited,
+                name: "unknown".to_owned(),
+            })
+        );
+    }
+
+    #[test]
+    fn api_error_json_snapshot() {
+        let error = ApiError::new(
+            ErrorKind::RoutineRateLimited,
+            Some(1_000),
+            BTreeMap::new(),
+            Some("req-1".to_owned()),
+        )
+        .expect("valid API error");
+        let json = serde_json::to_string(&error).expect("serializable API error");
+        insta::assert_snapshot!(json, @r###"{"code":-32020,"data":{"kind":"routine_rate_limited","retryable":false,"retryAfterMs":1000,"params":{},"requestId":"req-1"}}"###);
     }
 
     #[test]

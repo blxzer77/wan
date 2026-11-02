@@ -22,10 +22,10 @@ authors = ["wan contributors"]
 all = "deny"
 
 [workspace.dependencies]
-wan-types = { path = "crates/wan-types" }
-wan-sandbox = { path = "crates/wan-sandbox" }
-wan-vault = { path = "crates/wan-vault" }
-wan-host = { path = "crates/wan-host" }
-wan-core = { path = "crates/wan-core" }
-wan-acp = { path = "crates/wan-acp" }
-wan-pages = { path = "crates/wan-pages" }
+wan-types = { path = "crates/wan-types", version = "0.1.0" }
+wan-sandbox = { path = "crates/wan-sandbox", version = "0.1.0" }
+wan-vault = { path = "crates/wan-vault", version = "0.1.0" }
+wan-host = { path = "crates/wan-host", version = "0.1.0" }
+wan-core = { path = "crates/wan-core", version = "0.1.0" }
+wan-acp = { path = "crates/wan-acp", version = "0.1.0" }
+wan-pages = { path = "crates/wan-pages", version = "0.1.0" }

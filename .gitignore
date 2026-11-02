@@ -1,5 +1,6 @@
 # Rust
 /target/
+/crates/*/sbom.json
 
 # Node.js and pnpm
 node_modules/

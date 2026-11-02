@@ -1,0 +1,5 @@
+# Manual license metadata for packages whose upstream metadata needs correction.
+# Keys use the license-checker package@version form.
+
+[packages."license-checker-rseidelsohn@5.0.1"]
+license = "BSD-3-Clause"

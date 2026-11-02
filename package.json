@@ -6,6 +6,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "license-checker-rseidelsohn": "5.0.1",
     "typescript": "7.0.2"
   }
 }

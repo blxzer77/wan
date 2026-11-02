@@ -1,0 +1,37 @@
+# Rust
+/target/
+
+# Node.js and pnpm
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+
+# Electron and application builds
+dist/
+build/
+out/
+release/
+.vite/
+*.asar
+*.AppImage
+*.dmg
+*.deb
+*.rpm
+*.snap
+*.exe
+*.msi
+
+# Environment files
+.env*
+
+# Editors and IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Operating systems
+.DS_Store
+Thumbs.db
+desktop.ini

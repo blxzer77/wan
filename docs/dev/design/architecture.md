@@ -18,7 +18,7 @@
 
 ## 2 原则与标签
 
-> **原则** 照着 Grok Bot 做：GB 有文档的行为就照做；GB 没有的 wan 不做；wan 只给个人用（2026-11-01）。偏离 GB 的地方都标明已由 Yuki 批准。
+> **原则** 照着 Grok Bot 做：GB 有文档的行为就照做；GB 没有的 wan 不做；wan 只给个人用（2026-11-01）。偏离 GB 的地方都标明已由 Yuki 批准。如无必要勿增实体（crate、域、字段、版本号等），优先保持整体规范一致（2026-11-02【Yuki】）。
 
 | 标签 | 含义 |
 |---|---|
@@ -71,8 +71,8 @@
 ## 4 协议与类型
 
 - **协议**：JSON-RPC over WebSocket，Thread → Turn → Item（决策 2）。Item 按 started → delta → completed 推送；审批和表单由服务端主动发请求；Electron、PWA、CLI 用同一套协议；事件带全局 seq，断线后 `device/sync`（sinceSeq）补发。
-- **命名**：B4 + N1【Yuki】：方法 `domain/verb_object`，事件 `<domain>/event/<过去式>`。固定域：session、memory、routine、vault、pages、computer、acp、notify、device、system；协议消息用 `$/`；方法名 snake_case，参数 camelCase，枚举 snake_case，允许 `_meta`；`system/initialize` 的 protocolVersion 用日期；方法与通知在 wan-types 唯一登记。例：`session/respond_card`、`session/event/item_updated`、`system/event/status_changed`、`settings/get|update|reset`、`session/start_upload`。
-- **版本**：握手互换版本：主版本不同拒绝连接并提示升级；次版本只加字段、互相兼容（决策 38【Yuki】）
+- **命名**：B4 + N1【Yuki】：方法 `domain/verb_object`，事件 `<domain>/event/<过去式>`。固定域：session、memory、routine、vault、pages、computer、acp、notify、device、settings、system（2026-11-02 补 settings【Yuki】）；协议消息用 `$/`；方法名 snake_case，参数 camelCase，枚举 snake_case，允许 `_meta`；`system/initialize` 的 protocolVersion 用日期 `YYYY-MM-DD`；方法与通知在 wan-types 唯一登记。例：`session/respond_card`、`session/event/item_updated`、`system/event/status_changed`、`settings/get|update|reset`、`session/start_upload`。
+- **版本**：握手互换版本。protocolVersion 日期即主版本：只有不兼容改动才换日期，日期不同拒绝连接并提示升级；只加字段的改动（次版本）不换日期、互相兼容，不另设次版本号（决策 38；2026-11-02 定比较规则【Yuki】）
 - **类型**：Rust 为唯一来源；specta 生成 TS（决策 16、V2【Yuki】）。specta =2.0.0-rc.27，specta-serde / typescript / util =0.0.14，放在只能手动升级的 Renovate 组；schemars 只用于工具参数和配置，utoipa 只用于 /hooks 等 HTTP 端点；CI 比对全部生成物。
 - **Item**：决策 22：Item = 标签联合 message / tool_step / card / system_event / attachment【自】。卡片种类 email_draft、secure_form、approval、routine_created、question 等，必须带 fallback_text；卡片有状态 pending / submitted / expired，用带版本的 `session/respond_card` 回应，服务端推 `session/event/item_updated`。
 - **状态**：【GB】单独的 `system/event/status_changed`：idle / thinking / working / waiting / blocked / done 六态 + 当前动作文字（designing-grok-bot）。【自】由回合生命周期推导：blocked = 需要用户（审批、Secure Form、接管、Vault 未解锁）；waiting = 排队或在等 helper / 锁。
@@ -85,7 +85,7 @@
 
 ### 5.1 会话、回合、持久执行与存储
 
-- **1. 消息到达**：客户端发 `turn/start`（消息 ID 由客户端生成），服务端去重并写入 events 表，带 seq；routine、helper 回报、渠道消息走同一入口。
+- **1. 消息到达**：客户端发 `session/start_turn`（消息 ID 由客户端生成），服务端去重并写入 events 表，带 seq；routine、helper 回报、渠道消息走同一入口。
 - **2. 入队**：会话 actor 的 mpsc 队列：每个对话同一时刻一个回合；用户消息默认在下一个工具边界引导当前回合，可选排队；其他输入排队。优先级 P0 用户 > P1 群聊 > P2 后台，5 分钟防饿死（N3【Yuki】）。
 - **3. 开始回合**：写 turn 记录；按 stable / context / volatile 三层组装上下文，profile.md 在会话开始时冻结注入；系统提示词见 P1（待定）。
 - **4. 调用模型**：写一步 `model_call`（started）；流式 delta 作为 Item 事件推给在线客户端；结束写 completed 并记 usage 和 cost。

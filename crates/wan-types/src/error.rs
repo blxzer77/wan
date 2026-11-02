@@ -52,8 +52,7 @@ pub struct ApiError {
 pub struct ApiErrorData {
     pub kind: ErrorKind,
     pub retryable: bool,
-    #[specta(type = Option<u32>)]
-    pub retry_after_ms: Option<u64>,
+    pub retry_after_ms: Option<u32>,
     pub params: BTreeMap<String, String>,
     pub request_id: Option<String>,
 }
@@ -143,7 +142,7 @@ impl ErrorDomain {
 impl ApiError {
     pub fn new(
         kind: ErrorKind,
-        retry_after_ms: Option<u64>,
+        retry_after_ms: Option<u32>,
         params: BTreeMap<String, String>,
         request_id: Option<String>,
     ) -> Result<Self, ApiErrorBuildError> {

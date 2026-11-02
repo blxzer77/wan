@@ -35,3 +35,8 @@ release/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Agent tooling
+/.claude/*
+!/.claude/skills
+/.agents/skills/*/agents/openai.yaml

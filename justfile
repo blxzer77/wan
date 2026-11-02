@@ -29,5 +29,8 @@ licenses-check:
 sbom:
     cargo cyclonedx --manifest-path Cargo.toml --format json --spec-version 1.5 --override-filename sbom
 
-ci: fmt lint test deps-check debug-port-check supply-chain licenses-check sbom
+vendor-check:
+    python3 scripts/check-vendor-hashes.py
+
+ci: fmt lint test deps-check debug-port-check supply-chain licenses-check sbom vendor-check
     pnpm exec tsc --noEmit

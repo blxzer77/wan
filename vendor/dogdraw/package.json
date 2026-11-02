@@ -1,0 +1,14 @@
+{
+  "name": "dogdraw",
+  "version": "0.1.0",
+  "description": "Procedural SVG dogs and skeletal animation.",
+  "license": "MIT",
+  "main": "dogdraw.js",
+  "scripts": {
+    "build": "node build_html.js",
+    "test": "node --test doganim.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

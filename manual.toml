@@ -3,3 +3,8 @@
 
 [packages."license-checker-rseidelsohn@5.0.1"]
 license = "BSD-3-Clause"
+
+[packages."vendor/dogdraw@5b5f9380d368458adf6b3bb63d146b5513c942b4"]
+license = "MIT"
+repository = "https://github.com/atakankarsli/dogdraw"
+license_file = "vendor/dogdraw/LICENSE"

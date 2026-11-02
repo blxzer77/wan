@@ -9,6 +9,7 @@ Supplements the root `AGENTS.md`.
 | Root `AGENTS.md` | Standing instructions needed in every repository session. |
 | `docs/dev/` | Developer-facing design and implementation documentation. |
 | `docs/dev/adr/` | Long-term architecture decisions and their trade-offs. |
+| `docs/dev/design/`, `roadmap.md`, `tasks/`, `workflow.md` | Design (single authority), milestones, task status, orchestration loop — Simplified Chinese |
 | `docs/user/` | Product-facing setup and usage documentation. |
 | Crate `README.md` | The crate's purpose, public contract, usage, and limitations. |
 

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "schedule": ["every weekend"],
+  "minimumReleaseAge": "3 days",
+  "packageRules": [
+    {
+      "description": "Automatically merge patch updates",
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "description": "Require manual approval for specta updates",
+      "matchPackageNames": [
+        "specta",
+        "specta-serde",
+        "specta-typescript",
+        "specta-util"
+      ],
+      "automerge": false,
+      "dependencyDashboardApproval": true
+    }
+  ]
+}

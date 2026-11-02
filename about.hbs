@@ -1,0 +1,20 @@
+wan
+
+Copyright 2026 wan contributors.
+
+This project is licensed under the Apache License, Version 2.0.
+See the LICENSE file for the full license text.
+
+{{#each licenses}}
+{{#if first_of_kind}}
+
+{{name}} ({{id}})
+
+{{{text}}}
+
+Used by:
+{{#each used_by}}
+- {{crate.name}} {{crate.version}}
+{{/each}}
+{{/if}}
+{{/each}}

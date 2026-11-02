@@ -1,0 +1,12 @@
+[package]
+name = "wan-pages"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+wan-types.workspace = true
+
+[lints]
+workspace = true

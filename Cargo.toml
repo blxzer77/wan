@@ -1,0 +1,31 @@
+[workspace]
+members = [
+    "crates/wan-types",
+    "crates/wan-sandbox",
+    "crates/wan-vault",
+    "crates/wan-host",
+    "crates/wan-core",
+    "crates/wan-acp",
+    "crates/wan-pages",
+    "crates/wand",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+license = "Apache-2.0"
+authors = ["wan contributors"]
+
+[workspace.lints.clippy]
+all = "deny"
+
+[workspace.dependencies]
+wan-types = { path = "crates/wan-types" }
+wan-sandbox = { path = "crates/wan-sandbox" }
+wan-vault = { path = "crates/wan-vault" }
+wan-host = { path = "crates/wan-host" }
+wan-core = { path = "crates/wan-core" }
+wan-acp = { path = "crates/wan-acp" }
+wan-pages = { path = "crates/wan-pages" }

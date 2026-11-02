@@ -29,8 +29,9 @@ def main() -> int:
     overrides = manual.get("packages", {})
 
     rows: list[str] = []
-    for package_key in sorted(packages):
-        package = packages[package_key]
+    license_texts: list[str] = []
+    for package_key in sorted(set(packages) | set(overrides)):
+        package = packages.get(package_key, {})
         name, version = package_name(package_key)
         override = overrides.get(package_key, {})
         license_name = override.get("license", package.get("licenses", "UNKNOWN"))
@@ -50,14 +51,27 @@ def main() -> int:
             f"<td>{repository_html}</td>"
             "</tr>"
         )
+        license_file = override.get("license_file")
+        if license_file:
+            license_text = (manual_path.parent / license_file).read_text(encoding="utf-8")
+            license_texts.append(
+                f"<h3>{html.escape(name)} {html.escape(version)}</h3>"
+                f"<pre>{html.escape(license_text)}</pre>"
+            )
 
     body = "\n".join(rows) or '<tr><td colspan="4">No packages reported.</td></tr>'
+    license_text_body = "\n".join(license_texts)
+    license_text_section = (
+        f"<h2>Manual license texts</h2>\n{license_text_body}"
+        if license_text_body
+        else ""
+    )
     document = f'''<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <title>wan third-party licenses</title>
-  <style>body {{ font-family: sans-serif; margin: 2rem; }} table {{ border-collapse: collapse; width: 100%; }} th, td {{ border: 1px solid #ccc; padding: .4rem; text-align: left; }}</style>
+  <style>body {{ font-family: sans-serif; margin: 2rem; }} table {{ border-collapse: collapse; width: 100%; }} th, td {{ border: 1px solid #ccc; padding: .4rem; text-align: left; }} pre {{ white-space: pre-wrap; }}</style>
 </head>
 <body>
   <h1>wan third-party licenses</h1>
@@ -67,6 +81,7 @@ def main() -> int:
 {body}
     </tbody>
   </table>
+  {license_text_section}
 </body>
 </html>
 '''

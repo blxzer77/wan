@@ -20,7 +20,7 @@ supply-chain:
     pnpm audit --registry=https://registry.npmjs.org/ --audit-level high
 
 licenses:
-    tmp="$$(mktemp)" && trap 'rm -f "$$tmp"' EXIT && cargo about generate --workspace --frozen --fail --config about.toml --output-file NOTICE about.hbs && pnpm exec license-checker-rseidelsohn --failOn 'GPL;AGPL' --json --out "$$tmp" && python3 scripts/generate-third-party-licenses.py "$$tmp" manual.toml THIRD_PARTY_LICENSES.html
+    tmp="$$(mktemp)" && trap 'rm -f "$$tmp"' EXIT && cargo about generate --workspace --frozen --fail --config about.toml --output-file NOTICE about.hbs && python3 -c 'from pathlib import Path; p = Path("NOTICE"); p.write_text("\n".join(line.rstrip() for line in p.read_text().splitlines()) + "\n")' && pnpm exec license-checker-rseidelsohn --failOn 'GPL;AGPL' --json --out "$$tmp" && python3 scripts/generate-third-party-licenses.py "$$tmp" manual.toml THIRD_PARTY_LICENSES.html
 
 licenses-check:
     just licenses
@@ -40,5 +40,12 @@ errors-check:
     python3 scripts/check-errors.py
     git diff --exit-code HEAD -- docs/errors.md
 
-ci: fmt lint test deps-check debug-port-check supply-chain licenses-check sbom vendor-check errors-check
+gen:
+    cargo run -p wan-types --bin generate-types
+
+gen-check:
+    just gen
+    git diff --exit-code HEAD -- packages/wan-protocol/src/index.ts
+
+ci: fmt lint test deps-check debug-port-check supply-chain licenses-check sbom vendor-check errors-check gen-check
     pnpm exec tsc --noEmit

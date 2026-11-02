@@ -1,6 +1,9 @@
 use core::fmt;
 
-#[derive(Debug, Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
+use specta::Type;
+
+#[derive(Debug, Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd, Type)]
+#[specta(type = String)]
 pub struct ProtocolVersion {
     year: u16,
     month: u8,

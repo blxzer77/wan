@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
 pub const JSON_RPC_PARSE_ERROR: i32 = -32700;
 pub const JSON_RPC_INVALID_REQUEST: i32 = -32600;
@@ -19,7 +20,7 @@ pub enum ErrorDomain {
     Routine,
 }
 
-#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "snake_case")]
 pub enum ErrorKind {
     RoutineRateLimited,
@@ -40,17 +41,18 @@ pub const ERROR_REGISTRY: &[ErrorDefinition] = &[ErrorDefinition::new(
     -32_020,
 )];
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Type)]
 pub struct ApiError {
     pub code: i32,
     pub data: ApiErrorData,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct ApiErrorData {
     pub kind: ErrorKind,
     pub retryable: bool,
+    #[specta(type = Option<u32>)]
     pub retry_after_ms: Option<u64>,
     pub params: BTreeMap<String, String>,
     pub request_id: Option<String>,

@@ -7,6 +7,10 @@ license.workspace = true
 
 [dependencies]
 serde = { version = "=1.0.229", features = ["derive"] }
+specta = { version = "=2.0.0-rc.27", features = ["derive"] }
+specta-serde = "=0.0.14"
+specta-typescript = "=0.0.14"
+specta-util = "=0.0.14"
 
 [dev-dependencies]
 insta = "=1.49.0"

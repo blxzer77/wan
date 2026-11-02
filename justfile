@@ -32,5 +32,13 @@ sbom:
 vendor-check:
     python3 scripts/check-vendor-hashes.py
 
-ci: fmt lint test deps-check debug-port-check supply-chain licenses-check sbom vendor-check
+errors:
+    python3 scripts/generate-errors.py
+
+errors-check:
+    just errors
+    python3 scripts/check-errors.py
+    git diff --exit-code HEAD -- docs/errors.md
+
+ci: fmt lint test deps-check debug-port-check supply-chain licenses-check sbom vendor-check errors-check
     pnpm exec tsc --noEmit

@@ -4,6 +4,8 @@
 
 # Node.js and pnpm
 node_modules/
+__pycache__/
+*.py[cod]
 .pnpm-store/
 .pnpm-debug.log*
 
@@ -41,3 +43,4 @@ desktop.ini
 /.claude/*
 !/.claude/skills
 /.agents/skills/*/agents/openai.yaml
+!/crates/wan-types/src/snapshots/*.snap

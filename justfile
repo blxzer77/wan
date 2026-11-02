@@ -9,5 +9,11 @@ lint:
 test:
     cargo nextest run --workspace --no-tests=pass
 
-ci: fmt lint test
+deps-check:
+    python3 scripts/check-cargo-dependencies.py
+
+debug-port-check:
+    python3 scripts/check-no-debug-port.py
+
+ci: fmt lint test deps-check debug-port-check
     pnpm exec tsc --noEmit

@@ -376,10 +376,10 @@ Monorepo：根目录 Cargo workspace（crates/*）+ pnpm workspace（apps/*、pa
 
 | 依赖规则 | 内容 |
 |---|---|
-| 允许（A1【Yuki】） | types 在最底层；wan-core 只依赖 types，并拥有端口 trait（core::ports）；sandbox 依赖最少；vault → types（+ core::ports）；host → types、sandbox（+ core::ports）；acp、pages → types（+ core::ports）；wand 依赖全部并组装 |
+| 允许（A1【Yuki】） | types 在最底层；wan-core 只依赖 types，并拥有端口 trait（core::ports）；sandbox 依赖最少；vault → types；host → types、sandbox；acp、pages → types；适配器只暴露自己的具体 API（签名只用 wan-types 或自身类型），不实现 core 的 trait；wand 依赖全部，用本地 newtype 为各适配器实现 core::ports 并组装（[ADR 0002](../adr/0002-ports-owned-by-core-glued-in-wand.md)【Yuki】） |
 | 端口与数据（A2、A3【Yuki】） | 端口：Model、Computer、Browser、RemoteHost、SecretFill、CodingAgent、PageCompiler、Notifier、Clock、IdGen，各配内存 fake；表按模块加前缀归属，跨模块只走公开 API |
-| 检查（A4【Yuki】） | CI 用 cargo metadata 校验 crate 依赖图；core 内模块只暴露 facade；架构测试禁止引用其他模块内部路径 |
-| 禁止 | sandbox / host 永不链接 vault / core；types 不依赖任何 wan-*；crate 之间不能有环 |
+| 检查（A4【Yuki】） | CI 用 cargo metadata 校验 crate 依赖图，并断言 sandbox、host、vault、acp、pages 的依赖闭包里没有 wan-core；core 内模块只暴露 facade；架构测试禁止引用其他模块内部路径 |
+| 禁止 | sandbox / host / vault / acp / pages 永不依赖 wan-core；sandbox / host 永不链接 vault；types 不依赖任何 wan-*；crate 之间不能有环 |
 | 何时再拆 | 只看可观察信号：需要独立发布、编译时间或依赖污染、安全审计要求零链接 |
 
 | 目录 / 文件 | 内容 |

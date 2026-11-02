@@ -1,0 +1,18 @@
+[package]
+name = "wand"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+wan-types.workspace = true
+wan-sandbox.workspace = true
+wan-vault.workspace = true
+wan-host.workspace = true
+wan-core.workspace = true
+wan-acp.workspace = true
+wan-pages.workspace = true
+
+[lints]
+workspace = true

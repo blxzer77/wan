@@ -1,0 +1,1 @@
+{"id":"msg_3","type":"message","role":"assistant","model":"claude-test","content":[{"type":"tool_use","id":"toolu_3","name":"read_file","input":{"path":"b.txt"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":5,"cache_creation_input_tokens":40,"cache_read_input_tokens":100,"output_tokens":2}}

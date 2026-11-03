@@ -10,6 +10,7 @@ use secrecy::SecretString;
 use thiserror::Error;
 
 use crate::model::ModelError;
+use crate::model::classifier::{ClassifierRequest, ClassifierResult};
 use crate::model::types::{AssistantMessage, ModelRequest, StreamEvent};
 
 pub type ModelStream = BoxStream<'static, Result<StreamEvent, ModelError>>;
@@ -26,6 +27,15 @@ pub trait Model: Send + Sync {
         &self,
         request: ModelRequest,
     ) -> impl Future<Output = Result<AssistantMessage, ModelError>> + Send;
+}
+
+/// Answers typed questions about a JSON state (System One / Jev). Not a chat model: no
+/// streaming and no tool calls.
+pub trait Classifier: Send + Sync {
+    fn classify(
+        &self,
+        request: ClassifierRequest,
+    ) -> impl Future<Output = Result<ClassifierResult, ModelError>> + Send;
 }
 
 #[derive(Debug, Error)]
@@ -64,6 +74,44 @@ impl SecretSource for FakeSecretSource {
             .get(vault_ref)
             .map(|secret| SecretString::from(secret.as_str()))
             .ok_or_else(|| SecretError::NotFound(vault_ref.to_owned()))
+    }
+}
+
+/// In-memory `Classifier` for tests: replays queued results and records the requests it saw.
+#[derive(Debug, Default)]
+pub struct FakeClassifier {
+    results: Mutex<VecDeque<ClassifierResult>>,
+    requests: Mutex<Vec<ClassifierRequest>>,
+}
+
+impl FakeClassifier {
+    pub fn with_result(self, result: ClassifierResult) -> Self {
+        self.results
+            .lock()
+            .expect("fake classifier lock is not poisoned")
+            .push_back(result);
+        self
+    }
+
+    pub fn requests(&self) -> Vec<ClassifierRequest> {
+        self.requests
+            .lock()
+            .expect("fake classifier lock is not poisoned")
+            .clone()
+    }
+}
+
+impl Classifier for FakeClassifier {
+    async fn classify(&self, request: ClassifierRequest) -> Result<ClassifierResult, ModelError> {
+        self.requests
+            .lock()
+            .expect("fake classifier lock is not poisoned")
+            .push(request);
+        self.results
+            .lock()
+            .expect("fake classifier lock is not poisoned")
+            .pop_front()
+            .ok_or_else(|| ModelError::Protocol("fake classifier has no queued result".to_owned()))
     }
 }
 

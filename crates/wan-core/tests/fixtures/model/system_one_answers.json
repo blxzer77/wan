@@ -1,0 +1,1 @@
+{"answers":{"category":{"type":"choice","choice":"success","probabilities":{"success":0.9,"failure":0.1},"confidence":0.8},"satisfaction":{"type":"score","score":2,"confidence":0.7},"approved":{"type":"noul","noul":0.95}},"usage":{"input_tokens":308,"output_tokens":23}}

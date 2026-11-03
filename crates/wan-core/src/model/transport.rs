@@ -19,6 +19,8 @@ pub type BodyStream = BoxStream<'static, Result<Vec<u8>, ModelError>>;
 pub struct HttpRequest {
     pub url: String,
     pub bearer: SecretString,
+    /// Non-secret protocol headers, such as `anthropic-version`.
+    pub headers: Vec<(String, String)>,
     pub body: Value,
 }
 
@@ -58,12 +60,15 @@ impl ReqwestTransport {
 
 impl Transport for ReqwestTransport {
     async fn post(&self, request: HttpRequest) -> Result<HttpResponse, ModelError> {
-        let send = self
+        let mut builder = self
             .client
             .post(&request.url)
             .bearer_auth(request.bearer.expose_secret())
-            .json(&request.body)
-            .send();
+            .json(&request.body);
+        for (name, value) in &request.headers {
+            builder = builder.header(name.as_str(), value.as_str());
+        }
+        let send = builder.send();
         let response = tokio::time::timeout(timeouts::MODEL_RESPONSE_HEADER, send)
             .await
             .map_err(|_| ModelError::Timeout)??;

@@ -43,6 +43,7 @@ impl<T: Transport, S: SecretSource> Responses<T, S> {
             &self.secrets,
             &self.config,
             "/responses",
+            &[],
             request_body(request, stream),
         )
         .await

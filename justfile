@@ -55,5 +55,8 @@ i18n-check:
 docs-check:
     python3 scripts/check-docs.py
 
-ci: fmt lint test deps-check debug-port-check supply-chain licenses-check sbom vendor-check errors-check gen-check i18n-check docs-check
+docs-budget-check:
+    python3 scripts/check-doc-budgets.py
+
+ci: fmt lint test deps-check debug-port-check supply-chain licenses-check sbom vendor-check errors-check gen-check i18n-check docs-check docs-budget-check
     pnpm exec tsc --noEmit

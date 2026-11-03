@@ -1,0 +1,1 @@
+{"id":"resp_2","object":"response","status":"completed","output":[{"type":"reasoning","id":"rs_2","summary":[]},{"type":"message","id":"msg_2","role":"assistant","content":[{"type":"output_text","text":"Hello there."}]}],"usage":{"input_tokens":10,"input_tokens_details":{"cached_tokens":0},"output_tokens":3,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":13}}

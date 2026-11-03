@@ -2,7 +2,13 @@
 all-features = true
 
 [advisories]
-ignore = []
+# Only "unmaintained" advisories may be ignored here. A vulnerability advisory must never be
+# ignored: upgrade, replace the dependency, or remove the code path instead.
+ignore = [
+    { id = "RUSTSEC-2026-0370", reason = "zvariant is unmaintained (merged into zbus 6). Pulled in by keyring 4.2 through its Linux secret-service backend, which depends on zbus 5. Remove when keyring's Linux backend moves to zbus 6." },
+    { id = "RUSTSEC-2026-0371", reason = "zbus_names is unmaintained (merged into zbus 6). Pulled in by keyring 4.2 through its Linux secret-service backend, which depends on zbus 5. Remove when keyring's Linux backend moves to zbus 6." },
+    { id = "RUSTSEC-2026-0372", reason = "zvariant_derive is unmaintained (merged into zbus 6). Pulled in by keyring 4.2 through its Linux secret-service backend, which depends on zbus 5. Remove when keyring's Linux backend moves to zbus 6." },
+]
 
 [licenses]
 allow = [

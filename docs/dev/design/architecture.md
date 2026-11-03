@@ -150,7 +150,8 @@ GB 没有公开 routine 的实现；以下除标【GB】【Yuki】处外为【�
 - **Yuki**：恢复密钥（Emergency Kit）初始化时只显示一次，必须确认已保存才能继续。【自】256 位随机，能独立解开 DEK；服务器只存包装结果。
 - **自**：备份绝不含主密钥。备份 = 密文 + 包装后的 DEK；恢复到新机器需要 MK 文件或恢复密钥（7.3）。
 - **自**：轮换：换 MK 只重包 DEK；换 DEK 后台按 key_version 重加密，之后重新生成恢复密钥
-- **自**：实现：write-only API、zeroize / secrecy、审计日志。没有 get_secret；fill 在守护进程内解密并经 CDP 写入；审计只记元数据（时间、item_id、字段、目标 origin、触发的 thread / routine）。crate：chacha20poly1305、keyring、zeroize、secrecy。
+- **自**：实现：write-only API、zeroize / secrecy、审计日志。没有 get_secret：模型、工具、协议层永远拿不到明文；wan-vault 不导出返回明文的函数，只提供 `with_secret` 回调，明文始终包在 Zeroizing / SecretBox 里。fill（v1.1）与 core::ports::SecretSource（守护进程内部凭据，如模型 API key）都在守护进程内经此回调使用明文。审计只记元数据（时间、item_id、字段、目标 origin、触发的 thread / routine）。密码学 / 密钥 crate 只有 chacha20poly1305、keyring、zeroize、secrecy；keyring 关闭默认特性，只开各平台原生后端（Linux 为 secret-service），无桌面会话（NoDefaultStore）退回密钥文件。错误按 crates/AGENTS.md 用 thiserror。
+- **自**：存储边界（ADR 0002，2026-11-03【Yuki】）：wan-vault 不碰数据库，也不定义持久化 trait，只提供纯函数：传入值、返回值。WrappedKey、SealedItem（nonce、密文、key_version、格式版本）、审计记录都是普通结构体，由 wand 按列存入 SQLite，不需要 serde 或自定义二进制格式。Vault 未解锁时返回 Locked 错误，步骤暂停由 wan-core 编排。
 - **自**：能防 / 防不住。能防：磁盘或数据卷被拷走（MK 不同盘时）、备份泄露、沙箱被攻破、提示注入索取秘密。防不住：宿主机 root 失陷、守护进程内存被读、恶意页面读取已填入的值。
 
 <a id="s5-4"></a>

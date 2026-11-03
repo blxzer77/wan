@@ -8,7 +8,7 @@ use sqlx::{
 use thiserror::Error;
 
 static MIGRATOR: Migrator = sqlx::migrate!("./migrations");
-const LATEST_SCHEMA_VERSION: i64 = 3;
+const LATEST_SCHEMA_VERSION: i64 = 4;
 
 #[derive(Debug, Error)]
 pub enum StoreError {
@@ -110,7 +110,7 @@ mod tests {
     async fn initializes_new_database_and_is_idempotent() {
         let path = temp_database();
         let store = Store::connect(&path).await.expect("new database opens");
-        assert_eq!(store.schema_version().await.expect("version reads"), 3);
+        assert_eq!(store.schema_version().await.expect("version reads"), 4);
         assert_eq!(store.pool().size(), 1);
         assert_eq!(
             sqlx::query_scalar::<_, String>("PRAGMA journal_mode")
@@ -122,7 +122,7 @@ mod tests {
         drop(store);
 
         let store = Store::connect(&path).await.expect("database reopens");
-        assert_eq!(store.schema_version().await.expect("version reads"), 3);
+        assert_eq!(store.schema_version().await.expect("version reads"), 4);
         drop(store);
         cleanup(&path);
     }
@@ -146,7 +146,7 @@ mod tests {
         drop(pool);
 
         let store = Store::connect(&path).await.expect("old database migrates");
-        assert_eq!(store.schema_version().await.expect("version reads"), 3);
+        assert_eq!(store.schema_version().await.expect("version reads"), 4);
         let column = sqlx::query("PRAGMA table_info(store_metadata)")
             .fetch_one(store.pool())
             .await
@@ -173,7 +173,7 @@ mod tests {
             error,
             StoreError::SchemaTooNew {
                 found: 99,
-                supported: 3
+                supported: 4
             }
         ));
         cleanup(&path);

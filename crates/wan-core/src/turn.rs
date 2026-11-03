@@ -5,6 +5,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use tokio::sync::Notify;
 
+pub mod context;
+pub mod steplog;
+
 #[derive(Clone, Debug)]
 pub struct CancellationToken {
     inner: Arc<CancellationState>,

@@ -8,7 +8,7 @@ use sqlx::{
 use thiserror::Error;
 
 static MIGRATOR: Migrator = sqlx::migrate!("./migrations");
-const LATEST_SCHEMA_VERSION: i64 = 2;
+const LATEST_SCHEMA_VERSION: i64 = 3;
 
 #[derive(Debug, Error)]
 pub enum StoreError {
@@ -18,6 +18,8 @@ pub enum StoreError {
     Database(#[from] sqlx::Error),
     #[error("migration error: {0}")]
     Migration(#[from] MigrateError),
+    #[error("invalid event payload: {0}")]
+    InvalidEventPayload(String),
 }
 
 #[derive(Clone, Debug)]
@@ -108,7 +110,7 @@ mod tests {
     async fn initializes_new_database_and_is_idempotent() {
         let path = temp_database();
         let store = Store::connect(&path).await.expect("new database opens");
-        assert_eq!(store.schema_version().await.expect("version reads"), 2);
+        assert_eq!(store.schema_version().await.expect("version reads"), 3);
         assert_eq!(store.pool().size(), 1);
         assert_eq!(
             sqlx::query_scalar::<_, String>("PRAGMA journal_mode")
@@ -120,7 +122,7 @@ mod tests {
         drop(store);
 
         let store = Store::connect(&path).await.expect("database reopens");
-        assert_eq!(store.schema_version().await.expect("version reads"), 2);
+        assert_eq!(store.schema_version().await.expect("version reads"), 3);
         drop(store);
         cleanup(&path);
     }
@@ -144,7 +146,7 @@ mod tests {
         drop(pool);
 
         let store = Store::connect(&path).await.expect("old database migrates");
-        assert_eq!(store.schema_version().await.expect("version reads"), 2);
+        assert_eq!(store.schema_version().await.expect("version reads"), 3);
         let column = sqlx::query("PRAGMA table_info(store_metadata)")
             .fetch_one(store.pool())
             .await
@@ -171,7 +173,7 @@ mod tests {
             error,
             StoreError::SchemaTooNew {
                 found: 99,
-                supported: 2
+                supported: 3
             }
         ));
         cleanup(&path);

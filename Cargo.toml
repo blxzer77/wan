@@ -22,6 +22,9 @@ authors = ["wan contributors"]
 all = "deny"
 
 [workspace.dependencies]
+sqlx = { version = "=0.9.0", default-features = false, features = ["runtime-tokio", "sqlite", "migrate", "macros"] }
+thiserror = "2.0"
+tokio = { version = "=1.54.1", features = ["macros", "rt-multi-thread"] }
 wan-types = { path = "crates/wan-types", version = "0.1.0" }
 wan-sandbox = { path = "crates/wan-sandbox", version = "0.1.0" }
 wan-vault = { path = "crates/wan-vault", version = "0.1.0" }

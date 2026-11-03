@@ -56,6 +56,8 @@ Never commit secrets. Never print secrets in logs, command output, tests, issues
 
 - [`wan-pre-push-checks`](.agents/skills/wan-pre-push-checks/SKILL.md) — use before pushing or opening a PR to select the smallest relevant checks.
 - [`wan-adr`](.agents/skills/wan-adr/SKILL.md) — use when recording a long-term decision that code and normal documentation cannot explain.
+- [`wan-code-review`](.agents/skills/wan-code-review/SKILL.md) — use when reviewing changes against the design and task scope.
+- [`wan-pr-description`](.agents/skills/wan-pr-description/SKILL.md) — use when writing the required four-section pull request body.
 
 ## Vendored source
 

@@ -126,7 +126,7 @@ def check_adr_index() -> list[str]:
 
 def check_agents_files() -> list[str]:
     errors: list[str] = []
-    for relative in ("AGENTS.md", "docs/AGENTS.md", "crates/AGENTS.md"):
+    for relative in ("AGENTS.md", "apps/AGENTS.md", "docs/AGENTS.md", "crates/AGENTS.md"):
         if not (ROOT / relative).is_file():
             errors.append(f"{relative}: required AGENTS.md is missing")
     return errors

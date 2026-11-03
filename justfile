@@ -52,5 +52,8 @@ gen-check:
 i18n-check:
     python3 scripts/check-i18n.py --pseudo-output target/i18n/pseudo.ftl
 
-ci: fmt lint test deps-check debug-port-check supply-chain licenses-check sbom vendor-check errors-check gen-check i18n-check
+docs-check:
+    python3 scripts/check-docs.py
+
+ci: fmt lint test deps-check debug-port-check supply-chain licenses-check sbom vendor-check errors-check gen-check i18n-check docs-check
     pnpm exec tsc --noEmit

@@ -1,10 +1,14 @@
 //! Model layer: protocol adapters, not provider adapters. Any service that speaks one of the
 //! supported wire protocols works once the user supplies a base URL and a `vault_ref`.
 
+pub mod anthropic;
 pub(crate) mod blocks;
 pub mod chat_completions;
+pub mod classifier;
+pub mod pool;
 pub mod responses;
 pub mod sse;
+pub mod system_one;
 pub mod transport;
 pub mod types;
 
@@ -12,12 +16,13 @@ use std::collections::VecDeque;
 
 use futures_util::StreamExt;
 use futures_util::stream;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use thiserror::Error;
 
 use crate::ports::{ModelStream, SecretError, SecretSource};
 use transport::{BodyStream, HttpRequest, HttpResponse, Transport};
-use types::{Pricing, StreamEvent};
+use types::{Pricing, StreamEvent, Usage};
 
 #[derive(Debug, Error)]
 pub enum ModelError {
@@ -31,14 +36,24 @@ pub enum ModelError {
     Protocol(String),
     #[error("timed out waiting for the model response")]
     Timeout,
+    #[error("invalid model request: {0}")]
+    InvalidRequest(String),
+    /// The service answered but the answers are unusable. The request was still billed, so the
+    /// reported usage travels with the error.
+    #[error("malformed classifier answers: {message}")]
+    MalformedAnswers {
+        message: String,
+        usage: Option<Usage>,
+    },
 }
 
 /// Connection settings for one protocol endpoint. Only the `vault_ref` is stored; the key is
 /// resolved through `SecretSource` for every request.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct EndpointConfig {
     pub base_url: String,
     pub vault_ref: String,
+    #[serde(default)]
     pub pricing: Pricing,
 }
 
@@ -102,11 +117,23 @@ pub(crate) async fn post_json(
     secrets: &impl SecretSource,
     config: &EndpointConfig,
     path: &str,
+    headers: &[(&str, &str)],
     body: Value,
 ) -> Result<HttpResponse, ModelError> {
     let bearer = secrets.resolve(&config.vault_ref).await?;
     let url = format!("{}{path}", config.base_url.trim_end_matches('/'));
-    let response = transport.post(HttpRequest { url, bearer, body }).await?;
+    let headers = headers
+        .iter()
+        .map(|(name, value)| ((*name).to_owned(), (*value).to_owned()))
+        .collect();
+    let response = transport
+        .post(HttpRequest {
+            url,
+            bearer,
+            headers,
+            body,
+        })
+        .await?;
     if response.status / 100 != 2 {
         let status = response.status;
         let body = String::from_utf8_lossy(&response.collect().await?).into_owned();

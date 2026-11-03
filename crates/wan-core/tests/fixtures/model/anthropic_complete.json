@@ -1,0 +1,1 @@
+{"id":"msg_2","type":"message","role":"assistant","model":"claude-test","content":[{"type":"thinking","thinking":"Simple greeting.","signature":"sig"},{"type":"text","text":"Hello there."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":10,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":3}}

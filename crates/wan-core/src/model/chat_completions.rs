@@ -43,6 +43,7 @@ impl<T: Transport, S: SecretSource> ChatCompletions<T, S> {
             &self.secrets,
             &self.config,
             "/chat/completions",
+            &[],
             request_body(request, stream),
         )
         .await
